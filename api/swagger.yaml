@@ -1,0 +1,537 @@
+openapi: 3.0.0
+info:
+  title: QuantAI Platform API
+  description: AI-powered investment platform API
+  version: 1.0.0
+  contact:
+    name: QuantAI Support
+    email: support@quantai.com
+    
+servers:
+  - url: https://api.quantai.com/v1
+    description: Production server
+  - url: https://staging.api.quantai.com/v1
+    description: Staging server
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+          enum: [user, admin]
+        subscription_tier:
+          type: string
+          enum: [free, basic, premium, enterprise]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        last_login_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    Portfolio:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        total_value:
+          type: number
+          format: double
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Asset'
+        performance:
+          $ref: '#/components/schemas/Performance'
+        risk_score:
+          type: number
+          format: double
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Asset:
+      type: object
+      properties:
+        symbol:
+          type: string
+        type:
+          type: string
+          enum: [stock, crypto, forex, commodity]
+        quantity:
+          type: number
+          format: double
+        value:
+          type: number
+          format: double
+        last_update:
+          type: string
+          format: date-time
+
+    Performance:
+      type: object
+      properties:
+        daily_return:
+          type: number
+          format: double
+        weekly_return:
+          type: number
+          format: double
+        monthly_return:
+          type: number
+          format: double
+        yearly_return:
+          type: number
+          format: double
+        updated_at:
+          type: string
+          format: date-time
+
+    Prediction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        asset_symbol:
+          type: string
+        timeframe:
+          type: string
+          enum: [1h, 4h, 24h, 7d]
+        predicted_high:
+          type: number
+          format: double
+        predicted_low:
+          type: number
+          format: double
+        confidence:
+          type: number
+          format: double
+        indicators:
+          type: array
+          items:
+            $ref: '#/components/schemas/Indicator'
+        created_at:
+          type: string
+          format: date-time
+        valid_until:
+          type: string
+          format: date-time
+
+    Indicator:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: number
+          format: double
+        weight:
+          type: number
+          format: double
+
+    MarketAnalysis:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        asset_symbol:
+          type: string
+        sentiment:
+          type: number
+          format: double
+        volume_24h:
+          type: number
+          format: double
+        price_change_24h:
+          type: number
+          format: double
+        trend_strength:
+          type: number
+          format: double
+        signals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Signal'
+        updated_at:
+          type: string
+          format: date-time
+
+    Signal:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [buy, sell, hold]
+        strength:
+          type: number
+          format: double
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [error]
+        error_code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+        request_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - name
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                name:
+                  type: string
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /portfolio:
+    get:
+      tags:
+        - Portfolio
+      summary: Get user portfolios
+      responses:
+        '200':
+          description: List of portfolios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Portfolio'
+
+    post:
+      tags:
+        - Portfolio
+      summary: Create new portfolio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - assets
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                assets:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Asset'
+      responses:
+        '201':
+          description: Portfolio created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Portfolio'
+
+  /portfolio/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags:
+        - Portfolio
+      summary: Get portfolio by ID
+      responses:
+        '200':
+          description: Portfolio details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Portfolio'
+
+    put:
+      tags:
+        - Portfolio
+      summary: Update portfolio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Portfolio'
+      responses:
+        '200':
+          description: Portfolio updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Portfolio'
+
+    delete:
+      tags:
+        - Portfolio
+      summary: Delete portfolio
+      responses:
+        '204':
+          description: Portfolio deleted
+
+  /analytics/market/{symbol}:
+    parameters:
+      - name: symbol
+        in: path
+        required: true
+        schema:
+          type: string
+    
+    get:
+      tags:
+        - Analytics
+      summary: Get market analysis
+      responses:
+        '200':
+          description: Market analysis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketAnalysis'
+
+  /analytics/predictions/{symbol}:
+    parameters:
+      - name: symbol
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: timeframe
+        in: query
+        schema:
+          type: string
+          enum: [1h, 4h, 24h, 7d]
+          default: 24h
+    
+    get:
+      tags:
+        - Analytics
+      summary: Get price predictions
+      responses:
+        '200':
+          description: Price predictions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prediction'
+
+  /analytics/portfolio/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags:
+        - Analytics
+      summary: Get portfolio analytics
+      responses:
+        '200':
+          description: Portfolio analytics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  correlation_matrix:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      additionalProperties:
+                        type: number
+                  risk_metrics:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        volatility:
+                          type: number
+                        sharpe_ratio:
+                          type: number
+                        sortino_ratio:
+                          type: number
+                        max_drawdown:
+                          type: number
+                        var:
+                          type: number
+
+  /health:
+    get:
+      tags:
+        - System
+      summary: Get system health status
+      security: []
+      responses:
+        '200':
+          description: System health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [UP, DOWN, WARNING]
+                  components:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                          enum: [UP, DOWN, WARNING]
+                        details:
+                          type: object
+                          additionalProperties: true
+
+  /metrics:
+    get:
+      tags:
+        - System
+      summary: Get system metrics
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: System metrics in Prometheus format
+          content:
+            text/plain:
+              schema:
+                type: string
