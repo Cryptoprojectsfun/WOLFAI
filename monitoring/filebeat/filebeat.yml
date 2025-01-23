@@ -1,0 +1,68 @@
+filebeat.inputs:
+- type: container
+  paths:
+    - /var/lib/docker/containers/*/*.log
+  processors:
+    - add_docker_metadata:
+        host: "unix:///var/run/docker.sock"
+    - decode_json_fields:
+        fields: ["message"]
+        target: "json"
+        overwrite_keys: true
+
+filebeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
+
+processors:
+  - add_cloud_metadata: ~
+  - add_kubernetes_metadata:
+      host: ${NODE_NAME}
+      indexers:
+        - container:
+            field_format: "%{[container][id]}"
+      matchers:
+        - field_format:
+            format: "%{[container][id]}"
+  - drop_event:
+      when:
+        or:
+          - contains:
+              container.image.name: "filebeat"
+          - contains:
+              container.image.name: "prometheus"
+          - contains:
+              container.image.name: "grafana"
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  protocol: "http"
+  username: ${ELASTICSEARCH_USERNAME}
+  password: ${ELASTICSEARCH_PASSWORD}
+  indices:
+    - index: "quantai-logs-%{+yyyy.MM.dd}"
+      when.contains:
+        container.image.name: "quantai"
+    - index: "model-logs-%{+yyyy.MM.dd}"
+      when.contains:
+        container.image.name: "model-server"
+
+setup.template.settings:
+  index.number_of_shards: 1
+  index.number_of_replicas: 1
+
+setup.kibana:
+  host: "kibana:5601"
+
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
+
+setup.ilm.enabled: true
+setup.ilm.rollover_alias: "quantai-logs"
+setup.ilm.pattern: "{now/d}-000001"
