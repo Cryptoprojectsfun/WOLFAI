@@ -1,6 +1,6 @@
-# QuantAI - AI-Powered Investment Platform
+# WOLFAI - AI-Powered Investment Platform
 
-QuantAI is a sophisticated investment platform that leverages artificial intelligence to provide advanced portfolio management and market analysis capabilities.
+WOLFAI is a sophisticated investment platform that leverages artificial intelligence to provide advanced portfolio management and market analysis capabilities.
 
 ## Features
 
