@@ -1,94 +1,59 @@
 # WOLFAI - AI-Powered Investment Platform
 
-WOLFAI is a sophisticated investment platform that leverages artificial intelligence to provide advanced portfolio management and market analysis capabilities.
-
-## Features
-
-- 🤖 AI-Powered Market Analysis
-- 📊 Portfolio Management & Optimization
-- 📈 Real-time Trading Signals
-- 🔮 Predictive Analytics
-- 🎯 Custom Investment Strategies
-- 📱 Multi-Platform Support
-
-## Technology Stack
-
-- **Backend**: Go
-- **Database**: PostgreSQL
-- **Authentication**: JWT
-- **AI/ML**: Custom machine learning models
-- **API**: RESTful with JSON
-
-## Getting Started
-
-### Prerequisites
-
-- Go 1.21 or higher
-- PostgreSQL 14 or higher
-- Make (optional, for using Makefile commands)
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/Cryptoprojectsfun/quantai-clone.git
-cd quantai-clone
-```
-
-2. Install dependencies:
-```bash
-go mod download
-```
-
-3. Set up the environment variables:
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
-
-4. Run database migrations:
-```bash
-make migrate-up
-```
-
-5. Start the server:
-```bash
-make run
-```
-
-### Configuration
-
-The application can be configured using environment variables or a .env file:
-
-```env
-ENVIRONMENT=development
-PORT=8080
-DATABASE_URL=postgresql://user:password@localhost:5432/quantai?sslmode=disable
-JWT_SECRET=your-secret-key
-LOG_LEVEL=debug
-RATE_LIMIT=100
-```
+WOLFAI is an advanced investment platform using AI for portfolio management and market analysis.
 
 ## Project Structure
 
 ```
 .
-├── cmd/
-│   └── server/
-│       └── main.go
-├── internal/
-│   ├── models/
-│   │   ├── user.go
-│   │   ├── portfolio.go
-│   │   └── prediction.go
-│   ├── services/
-│   │   ├── ai/
-│   │   ├── portfolio/
-│   │   └── analytics/
-│   └── middleware/
-│       └── auth.go
-├── pkg/
-│   ├── logger/
-│   └── database/
-└── migrations/
+├── cmd/                    # Application entry points
+│   └── server/            # Main server application
+├── config/                # Configuration files
+│   ├── app.yaml           # Application config
+│   └── ml/                # ML model configs
+├── internal/              # Private application code
+│   ├── api/               # API handlers and routes
+│   ├── auth/              # Authentication logic
+│   ├── ml/                # Machine learning models
+│   ├── models/            # Data models
+│   └── services/          # Business logic
+├── migrations/            # Database migrations
+├── pkg/                   # Public packages
+│   ├── database/          # Database utilities
+│   └── logger/            # Logging utilities
+└── scripts/               # Utility scripts
 ```
+
+## Features
+
+- Real-time market analysis
+- Portfolio optimization
+- Trading signals
+- Risk management
+- User authentication
+- Admin dashboard
+
+## Setup
+
+1. Clone and install dependencies:
+```bash
+git clone https://github.com/Cryptoprojectsfun/quantai-clone.git
+cd quantai-clone
+go mod download
+```
+
+2. Configure environment:
+```bash
+cp config/app.example.yaml config/app.yaml
+# Edit config/app.yaml
+```
+
+3. Run migrations and start server:
+```bash
+make migrate
+make run
+```
+
+## Documentation
+
+API documentation available at `/api/docs` after starting the server.
