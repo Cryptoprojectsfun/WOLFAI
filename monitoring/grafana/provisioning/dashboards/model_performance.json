@@ -1,0 +1,252 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": 1,
+  "title": "AI Model Performance",
+  "description": "Performance metrics for AI prediction models",
+  "tags": ["ai", "ml", "models"],
+  "style": "dark",
+  "timezone": "browser",
+  "panels": [
+    {
+      "title": "Model Confidence",
+      "type": "graph",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "targets": [
+        {
+          "expr": "model_prediction_confidence{model_id=~\"$model\"}",
+          "legendFormat": "{{model_id}}",
+          "interval": "",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [
+        {
+          "format": "percentunit",
+          "label": "Confidence",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "format": "short",
+          "show": false
+        }
+      ],
+      "options": {
+        "alertThreshold": true
+      }
+    },
+    {
+      "title": "Prediction Latency",
+      "type": "graph",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "targets": [
+        {
+          "expr": "rate(model_prediction_duration_seconds_sum{model_id=~\"$model\"}[5m]) / rate(model_prediction_duration_seconds_count{model_id=~\"$model\"}[5m])",
+          "legendFormat": "{{model_id}}",
+          "interval": "",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [
+        {
+          "format": "s",
+          "label": "Duration"
+        },
+        {
+          "format": "short",
+          "show": false
+        }
+      ]
+    },
+    {
+      "title": "Prediction Rate",
+      "type": "graph",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "targets": [
+        {
+          "expr": "rate(model_predictions_total{model_id=~\"$model\"}[5m])",
+          "legendFormat": "{{model_id}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [
+        {
+          "format": "ops",
+          "label": "Predictions/sec"
+        },
+        {
+          "format": "short",
+          "show": false
+        }
+      ]
+    },
+    {
+      "title": "Error Rate",
+      "type": "graph",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 4,
+      "targets": [
+        {
+          "expr": "rate(model_prediction_errors_total{model_id=~\"$model\"}[5m])",
+          "legendFormat": "{{model_id}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [
+        {
+          "format": "ops",
+          "label": "Errors/sec"
+        },
+        {
+          "format": "short",
+          "show": false
+        }
+      ]
+    },
+    {
+      "title": "Model Resource Usage",
+      "type": "graph",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 5,
+      "targets": [
+        {
+          "expr": "rate(process_cpu_seconds_total{job=\"model-server\"}[5m])",
+          "legendFormat": "CPU Usage",
+          "refId": "A"
+        },
+        {
+          "expr": "process_resident_memory_bytes{job=\"model-server\"}",
+          "legendFormat": "Memory Usage",
+          "refId": "B"
+        }
+      ],
+      "yaxes": [
+        {
+          "format": "percent",
+          "label": "CPU"
+        },
+        {
+          "format": "bytes",
+          "label": "Memory"
+        }
+      ]
+    },
+    {
+      "title": "Model Accuracy",
+      "type": "gauge",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 6,
+      "targets": [
+        {
+          "expr": "model_accuracy{model_id=~\"$model\"}",
+          "legendFormat": "{{model_id}}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "horizontal",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": null,
+                "color": "red"
+              },
+              {
+                "value": 0.7,
+                "color": "yellow"
+              },
+              {
+                "value": 0.9,
+                "color": "green"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "model",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(model_prediction_confidence, model_id)",
+        "regex": "",
+        "sort": 1,
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "refresh": "10s",
+  "schemaVersion": 26,
+  "version": 1,
+  "links": []
+}
