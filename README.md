@@ -1,5 +1,7 @@
 # WOLFAI - AI-Powered Investment Platform
 
+Https://wolf-ai.xyz
+
 WOLFAI is an advanced investment platform that leverages artificial intelligence and machine learning to provide portfolio management, real-time market analysis, and automated trading signals.
 
 ## Key Features
