@@ -1,8 +1,8 @@
-# WOLFAI - AI-Powered Investment Platform
+# HOUNDAI - AI-Powered Investment Platform
 
-Https://wolf-ai.xyz
+Https://houndai.xyz
 
-WOLFAI is an advanced investment platform that leverages artificial intelligence and machine learning to provide portfolio management, real-time market analysis, and automated trading signals.
+HOUNDAI is an advanced investment platform that leverages artificial intelligence and machine learning to provide portfolio management, real-time market analysis, and automated trading signals.
 
 ## Key Features
 
@@ -32,7 +32,7 @@ WOLFAI is an advanced investment platform that leverages artificial intelligence
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/Cryptoprojectsfun/WOLFAI.git
+git clone https://github.com/QUOTRIX/HOUNDAI.git
 cd WOLFAI
 ```
 
@@ -55,7 +55,7 @@ cp config/app.example.yaml config/app.yaml
 5. Setup databases:
 ```bash
 # Start PostgreSQL and create database
-createdb wolfai
+createdb houndai
 
 # Run migrations
 make migrate
